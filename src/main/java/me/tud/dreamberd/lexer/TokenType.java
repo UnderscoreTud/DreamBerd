@@ -41,7 +41,7 @@ public enum TokenType {
     COMMENT(reader -> {
         if (!reader.isNext("//"))
             return null;
-        return reader.finish();
+        return reader.readUntil(c -> c == '\n');
     }),
     VARIABLE_MODIFIER(reader -> {
         int start = reader.getCursor();
@@ -86,6 +86,11 @@ public enum TokenType {
         }
         return null;
     }),
+    FILE_SEPARATOR(reader -> {
+        if (!reader.canRead(5))
+            return null;
+        return reader.readUntil(c -> c != '=').length() < 5 ? null : MagicValues.EMPTY_VALUE;
+    }),
     ARROW_OPERATOR(reader -> {
         if (!reader.canRead(2))
             return null;
@@ -104,7 +109,11 @@ public enum TokenType {
     ELSE("else"),
     WHEN("when"),
     PREVIOUS("previous"),
+    NEXT("next"),
+    AFTER("after"),
+    AWAIT("await"),
     DELETE("delete"),
+    RETURN("return"),
     FUNCTION_DEFINITION(reader -> {
         String function = MagicValues.FUNCTION_KEYWORD;
         String string = reader.readUntil(c -> c == ' ');
@@ -139,6 +148,10 @@ public enum TokenType {
             return null;
         return number;
     }),
+    COMPARISON_OPERATOR(reader -> switch (reader.peek()) {
+        case '>', '<' -> reader.read();
+        default -> null;
+    }),
     LITERAL_BOOLEAN(reader -> {
         int start = reader.getCursor();
         if (reader.isNext("true", true))
@@ -167,7 +180,7 @@ public enum TokenType {
                     escape = true;
                     continue;
                 }
-                builder.append(reader.readUntil(quotePredicate.negate()));
+                builder.append(reader.readUntil(quotePredicate.negate().or(c -> c == '\\')));
                 String quotes = reader.readUntil(quotePredicate);
                 if (quotes.equals(endQuotes))
                     break;
@@ -183,6 +196,8 @@ public enum TokenType {
     OTHER(StringReader::read)
     ;
 
+    private final Function<StringReader, Object> parser;
+
     TokenType(char c) {
         this(reader -> reader.read() == c ? MagicValues.EMPTY_VALUE : null);
     }
@@ -195,7 +210,17 @@ public enum TokenType {
         this.parser = parser;
     }
 
-    private final Function<StringReader, Object> parser;
+    public Function<StringReader, Object> getParser() {
+        return parser;
+    }
+
+    public boolean isSignificant() {
+        return !TokenGroup.INSIGNIFICANT.contains(this);
+    }
+
+    public boolean isIdentifier() {
+        return TokenGroup.IDENTIFIER.contains(this);
+    }
 
     public static @Nullable Token parse(StringReader reader) {
         return parse(values(), reader);

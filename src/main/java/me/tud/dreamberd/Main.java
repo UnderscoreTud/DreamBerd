@@ -1,15 +1,20 @@
 package me.tud.dreamberd;
 
 import me.tud.dreamberd.lexer.Lexer;
+import me.tud.dreamberd.lexer.Token;
+
+import java.util.LinkedList;
 
 public class Main {
 
     public static void main(String[] args) {
         String input = """
-                test!¡""";
+                if (1 += 2) print("hello")!""";
         Lexer lexer = new Lexer(input);
-        System.out.println(input);
-        lexer.tokenize().forEach(System.out::println);
+        LinkedList<Token> buffer = lexer.tokenize();
+        buffer.stream()
+                .filter(token -> token.type().isSignificant())
+                .forEach(System.out::println);
     }
 
 }
