@@ -10,6 +10,14 @@ public record Token(TokenType type, Object value, String raw, int start, int end
         return string.substring(start, end);
     }
 
+    public boolean is(TokenType... types) {
+        for (TokenType type : types) {
+            if (this.type == type)
+                return true;
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return "Token[type=" + type + (value == null ? "" : ", value=" + value) +

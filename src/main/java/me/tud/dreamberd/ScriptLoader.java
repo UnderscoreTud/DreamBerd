@@ -11,14 +11,15 @@ public class ScriptLoader {
 
     private static final Map<String, Script> LOADED_SCRIPTS = new HashMap<>();
 
-    public Script load(String fileName) throws IOException {
-        return load(new File("scripts", fileName));
+    public static Script load(String fileName) throws IOException {
+        return load(new File(System.getProperty("user.dir") + "/scripts", fileName));
     }
 
-    public Script load(File file) throws IOException {
+    public static Script load(File file) throws IOException {
         String input = FileUtils.readFile(file);
-        // parsing and loading stuff
-        return null;
+        Script script = new Script(file, input);
+        script.parse();
+        return script;
     }
 
 }

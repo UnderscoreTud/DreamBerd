@@ -1,31 +1,18 @@
 package me.tud.dreamberd.utils;
 
-import java.util.Locale;
 import java.util.function.Predicate;
 
-public class StringReader implements Cloneable {
+public class StringReader extends ArrayReader<Character> implements Cloneable {
 
     private final String string;
-    private int cursor = 0;
 
     public StringReader(String string) {
+        super(ArrayUtils.box(string.toCharArray()));
         this.string = string;
-    }
-
-    public int getCursor() {
-        return cursor;
-    }
-
-    public void setCursor(int cursor) {
-        this.cursor = cursor;
     }
 
     public String getString() {
         return string;
-    }
-
-    public int getRemaining() {
-        return string.length() - cursor;
     }
 
     public String finish() {
@@ -38,22 +25,9 @@ public class StringReader implements Cloneable {
         if (!canRead())
             return "";
         StringBuilder builder = new StringBuilder();
-        while (canRead() && !predicate.test(peek())) {
+        while (canRead() && !predicate.test(peek()))
             builder.append(read());
-        }
         return builder.toString();
-    }
-
-    public boolean canRead() {
-        return canRead(1);
-    }
-
-    public boolean canRead(int offset) {
-        return cursor + offset <= string.length();
-    }
-
-    public char read() {
-        return string.charAt(cursor++);
     }
 
     public String read(int amount) {
@@ -73,21 +47,9 @@ public class StringReader implements Cloneable {
         return ignoreCase ? match.equalsIgnoreCase(read) : match.equals(read);
     }
 
-    public char peek() {
-        return peek(0);
-    }
-
-    public char peek(int offset) {
-        return string.charAt(cursor + offset);
-    }
-
     @Override
     public StringReader clone() {
-        try {
-            return (StringReader) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
+        return (StringReader) super.clone();
     }
 
 }

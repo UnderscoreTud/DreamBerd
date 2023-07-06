@@ -2,6 +2,8 @@ package me.tud.dreamberd.lexer;
 
 import me.tud.dreamberd.MagicValues;
 import me.tud.dreamberd.UnsureBoolean;
+import me.tud.dreamberd.lang.VariableModifiers;
+import me.tud.dreamberd.lang.variable.Lifetime;
 import me.tud.dreamberd.utils.StringReader;
 import me.tud.dreamberd.utils.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -35,21 +37,8 @@ public enum TokenType {
     LEFT_CURLY_BRACKET('{'),
     RIGHT_CURLY_BRACKET('}'),
     PERIOD('.'),
-    WHITESPACE(' '),
     COMMA(','),
     COLON(':'),
-    COMMENT(reader -> {
-        if (!reader.isNext("//"))
-            return null;
-        return reader.readUntil(c -> c == '\n');
-    }),
-    VARIABLE_MODIFIER(reader -> {
-        int start = reader.getCursor();
-        if (reader.isNext("var"))
-            return MagicValues.VAR_MODIFIER;
-        reader.setCursor(start);
-        return reader.isNext("const") ? MagicValues.CONST_MODIFIER : null;
-    }),
     INDENT(reader -> {
         int level = 0;
         int start = 0;
@@ -66,8 +55,21 @@ public enum TokenType {
         reader.setCursor(start);
         return level;
     }),
+    WHITESPACE(' '),
+    COMMENT(reader -> {
+        if (!reader.isNext("//"))
+            return null;
+        return reader.readUntil(c -> c == '\n' || c == '\r');
+    }),
+    VARIABLE_MODIFIER(reader -> {
+        int start = reader.getCursor();
+        if (reader.isNext("var"))
+            return VariableModifiers.VAR;
+        reader.setCursor(start);
+        return reader.isNext("const") ? VariableModifiers.CONST : null;
+    }),
     NEW_LINE(reader -> {
-        String string = reader.readUntil(c -> c != '\n');
+        String string = reader.readUntil(c -> c != '\n' && c != '\r');
         return string.isEmpty() ? null : MagicValues.EMPTY_VALUE;
     }),
     ARITHMETIC_OPERATOR(reader -> {
@@ -144,9 +146,9 @@ public enum TokenType {
             return null;
         Number number = (Number) LITERAL_NUMBER.parser.apply(reader);
         // TODO finish parser for this
-        if (number == null || reader.read() != '>')
+        if (number == null || number instanceof Double || reader.read() != '>')
             return null;
-        return number;
+        return new Lifetime(number.longValue());
     }),
     COMPARISON_OPERATOR(reader -> switch (reader.peek()) {
         case '>', '<' -> reader.read();

@@ -1,9 +1,10 @@
 package me.tud.dreamberd.lexer;
 
-import me.tud.dreamberd.ParseException;
+import me.tud.dreamberd.exceptions.ParseException;
 import me.tud.dreamberd.utils.StringReader;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class Lexer {
 
@@ -17,8 +18,8 @@ public class Lexer {
         this.reader = reader;
     }
 
-    public LinkedList<Token> tokenize() throws ParseException {
-        LinkedList<Token> tokens = new LinkedList<>();
+    public List<Token> tokenize() throws ParseException {
+        List<Token> tokens = new LinkedList<>();
         while (reader.canRead())
             tokens.add(nextToken());
         return tokens;

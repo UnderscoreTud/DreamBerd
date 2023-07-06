@@ -1,8 +1,8 @@
-package me.tud.dreamberd;
+package me.tud.dreamberd.exceptions;
 
 import me.tud.dreamberd.utils.StringReader;
 
-public class ParseException extends RuntimeException {
+public class ParseException extends DreamBerdException {
 
     public ParseException(StringReader reader) {
         this("Unexpected character: " + reader.peek(), reader.getCursor());

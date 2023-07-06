@@ -5,7 +5,7 @@ import java.util.Set;
 public enum TokenGroup {
 
     INSIGNIFICANT(TokenType.WHITESPACE, TokenType.NEW_LINE, TokenType.COMMENT),
-    IDENTIFIER(TokenType.LITERAL_STRING, TokenType.LITERAL_NUMBER, TokenType.OTHER)
+    IDENTIFIER(TokenType.LITERAL_STRING, TokenType.LITERAL_NUMBER, TokenType.LITERAL_BOOLEAN, TokenType.OTHER)
     ;
 
     private final Set<TokenType> types;
